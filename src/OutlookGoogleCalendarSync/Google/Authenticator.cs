@@ -347,19 +347,10 @@ namespace OutlookGoogleCalendarSync.Google {
                 userDonationCheck();
                 checkedOgcsUserStatus = true;
 
-                Boolean? hideSplash = null;
-                if (Settings.Instance.UserIsBenefactor()) {
-                    if (Settings.Instance.HideSplashScreen == null) {
-                        hideSplash = Ogcs.Extensions.MessageBox.Show("Thank you for your support of OGCS!\r\nWould you like the splash screen to be hidden from now on?", "Hide Splash Screen?",
-                            MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
-                    }
-                } else if (Settings.Instance.HideSplashScreen == true) {
-                    log.Fine("Splash screen was set to hide without a donation being registered.");
-                    hideSplash = false;
-                }
-                if (hideSplash != null) {
-                    Forms.Main.Instance.SetControlPropertyThreadSafe(Forms.Main.Instance.cbHideSplash, "Checked", hideSplash);
-                    Settings.Instance.HideSplashScreen = hideSplash;
+                //Forced silent: never prompt about splash screen; always set hidden.
+                if (Settings.Instance.HideSplashScreen != true) {
+                    Forms.Main.Instance.SetControlPropertyThreadSafe(Forms.Main.Instance.cbHideSplash, "Checked", true);
+                    Settings.Instance.HideSplashScreen = true;
                 }
             }
         }

@@ -521,24 +521,9 @@ namespace OutlookGoogleCalendarSync {
                 }
                 Settings.Instance.Version = Application.ProductVersion;
                 if (isHotFix) {
-                    if (!(Settings.Instance.CloudLogging ?? false) | Settings.Instance.TelemetryDisabled) {
-                        String disabledSetting = (!(Settings.Instance.CloudLogging ?? false) ? "automatic feedback of errors" : "");
-                        if (Settings.Instance.TelemetryDisabled) {
-                            if (!String.IsNullOrEmpty(disabledSetting)) disabledSetting += " and ";
-                            disabledSetting += "telemetry";
-                        }
-                        if (Ogcs.Extensions.MessageBox.Show("As you are running a hotfix release, it would be helpful if you could enable " + disabledSetting + ".",
-                            "OGCS hotfix release troubleshooting", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) {
-                            Settings.Instance.TelemetryDisabled = false;
-                            Settings.Instance.CloudLogging = true;
-                        }
-                    }
+                    //Forced silent: skip hotfix telemetry/cloud-logging prompt.
                 } else { //Release notes not updated for hotfixes.
-                    String releaseNotesUrl = "/release-notes.html";
-                    if (!String.IsNullOrEmpty(Settings.Instance.GaccountEmail)) {
-                        releaseNotesUrl += "?id=" + Extensions.OgcsString.ToBase64String(Settings.Instance.GaccountEmail);
-                    }
-                    Helper.OpenBrowser(OgcsWebsite + releaseNotesUrl);
+                    //Forced silent: do not open release notes browser tab on version change.
                     if (isSquirrelInstall) {
                         new Telemetry.GA4Event.Event(Telemetry.GA4Event.Event.Name.squirrel)
                             .AddParameter(GA4.Squirrel.upgraded_from, settingsVersion)

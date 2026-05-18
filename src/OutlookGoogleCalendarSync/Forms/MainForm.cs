@@ -56,18 +56,19 @@ namespace OutlookGoogleCalendarSync.Forms {
             log.Debug("Initialise the timer(s) for the auto synchronisation");
             Settings.Instance.Calendars.ForEach(cal => { cal.InitialiseTimer(); cal.RegisterForPushSync(); });
 
-            if (Settings.Instance.StartInTray) {
-                if (!this.IsHandleCreated) this.CreateHandle();
-                this.WindowState = FormWindowState.Minimized;
-            }
+            //Forced silent startup: never auto-show. Form only visible via tray click → MainFormShow().
+            if (!this.IsHandleCreated) this.CreateHandle();
+            this.ShowInTaskbar = false;
             if (((Sync.Engine.Instance.NextSyncDate ?? DateTime.Now.AddMinutes(10)) - DateTime.Now).TotalMinutes > 5) {
                 Outlook.Calendar.Disconnect(onlyWhenNoGUI: true);
             }
-            while (!Forms.Splash.BeenAndGone) {
-                System.Threading.Thread.Sleep(100);
-            }
-            if (!Settings.Instance.StartInTray)
-                this.MainFormShow(true);
+        }
+
+        private Boolean _allowVisible = false;
+        protected override void SetVisibleCore(Boolean value) {
+            //Forced silent startup: block all show attempts until MainFormShow() explicitly permits.
+            if (!_allowVisible) value = false;
+            base.SetVisibleCore(value);
         }
 
         private void updateGUIsettings() {
@@ -1023,6 +1024,7 @@ namespace OutlookGoogleCalendarSync.Forms {
 
         public void MainFormShow(Boolean forceToTop = false) {
             if (this.WindowState == FormWindowState.Minimized || !this.Visible || !this.TopMost || !this.ShowInTaskbar) {
+                _allowVisible = true; //Forced silent startup: permit form visibility from tray-driven action.
                 this.tbSyncNote.ScrollBars = RichTextBoxScrollBars.None; //Reset scrollbar
                 this.Show(); //Show minimised back in taskbar
                 this.WindowState = FormWindowState.Normal;
@@ -1043,6 +1045,7 @@ namespace OutlookGoogleCalendarSync.Forms {
                 log.Info("Minimising application to task tray.");
                 this.ShowInTaskbar = false;
                 this.Hide();
+                _allowVisible = false; //Forced silent: re-block visibility until next explicit MainFormShow().
                 if (Settings.Instance.ShowSystemNotificationWhenMinimising) {
                     NotificationTray.ShowBubbleInfo("OGCS is still running.\r\nClick here to disable this notification.", ToolTipIcon.Info, "ShowSystemNotificationWhenMinimising");
                 } else {
@@ -2878,6 +2881,7 @@ namespace OutlookGoogleCalendarSync.Forms {
         #region Social Media
         public void CheckSyncMilestone() {
             try {
+                return; //Forced silent: never show "spread the word" milestone popup.
                 if (Settings.Instance.SuppressSocialPopup && Settings.Instance.UserIsBenefactor()) return;
 
                 Boolean isMilestone = false;

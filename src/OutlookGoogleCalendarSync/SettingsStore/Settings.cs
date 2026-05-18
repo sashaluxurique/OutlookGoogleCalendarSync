@@ -289,7 +289,7 @@ namespace OutlookGoogleCalendarSync {
             }
         }
         public Boolean UserIsBenefactor() {
-            return Subscribed != Ogcs.Google.Authenticator.SubscribedNever || donor;
+            return true;
         }
         [DataMember] public DateTime Subscribed {
             get { return subscribed; }

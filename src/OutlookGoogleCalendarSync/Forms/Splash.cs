@@ -22,17 +22,9 @@ namespace OutlookGoogleCalendarSync.Forms {
         }
 
         public static void ShowMe() {
-            if (splashThread == null) {
-                splashThread = new Thread(new ThreadStart(doShowSplash)) { IsBackground = true };
-                splashThread.Start();
-                while (!initialised) {
-                    //Stop the program continuing until splash screen has finished accessing settings.xml
-                    Thread.Sleep(50);
-                }
-            } else {
-                splash.Dispose();
-                doShowSplash();
-            }
+            //Forced silent startup: splash disabled unconditionally.
+            initialised = true;
+            BeenAndGone = true;
         }
         private static void doShowSplash() {
             try {
