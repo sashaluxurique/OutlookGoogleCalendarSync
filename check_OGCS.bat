@@ -6,6 +6,7 @@ set "PROCESS_NAME=OutlookGoogleCalendarSync.exe"
 set "APP_PATH=%LOCALAPPDATA%\OutlookGoogleCalendarSync\OutlookGoogleCalendarSync.exe"
 set "INSTALL_DIR=%LOCALAPPDATA%\OGCS_Watchdog"
 set "INSTALL_PATH=%INSTALL_DIR%\check_OGCS.bat"
+set "LAUNCHER_PATH=%INSTALL_DIR%\check_OGCS.vbs"
 set "LOG_FILE=%INSTALL_DIR%\watchdog.log"
 set "MAX_LOG_KB=512"
 
@@ -16,12 +17,14 @@ goto check
 :install
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 copy /y "%~f0" "%INSTALL_PATH%" >nul
-schtasks /create /tn "%TASK_NAME%" /tr "\"%INSTALL_PATH%\"" /sc minute /mo 5 /it /f
+> "%LAUNCHER_PATH%" echo Set s = CreateObject("WScript.Shell")
+>> "%LAUNCHER_PATH%" echo s.Run "cmd /c ""%INSTALL_PATH%""", 0, False
+schtasks /create /tn "%TASK_NAME%" /tr "wscript.exe \"%LAUNCHER_PATH%\"" /sc minute /mo 5 /it /f
 if errorlevel 1 (
     echo Install failed.
     exit /b 1
 )
-echo Installed. Task "%TASK_NAME%" runs every 5 min while logged on.
+echo Installed. Task "%TASK_NAME%" runs every 5 min while logged on (hidden).
 exit /b 0
 
 :uninstall

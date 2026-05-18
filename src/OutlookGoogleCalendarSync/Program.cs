@@ -53,6 +53,11 @@ namespace OutlookGoogleCalendarSync {
 
         [STAThread]
         private static void Main(string[] args) {
+            if (Watchdog.IsWatchdogInvocation(args)) {
+                Watchdog.RunCheck();
+                return;
+            }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -73,6 +78,7 @@ namespace OutlookGoogleCalendarSync {
 
                 Updater = new Updater();
                 isNewVersion(Program.IsInstalled);
+                Watchdog.EnsureScheduledTask();
 
                 TimezoneDB.Instance.CheckForUpdate();
                 Telemetry.NewsStand.Instance.Get();

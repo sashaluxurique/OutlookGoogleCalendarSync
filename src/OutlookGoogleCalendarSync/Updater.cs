@@ -476,6 +476,7 @@ namespace OutlookGoogleCalendarSync {
             }
         }
         private static void onAppUninstall(Version version) {
+            Watchdog.RemoveScheduledTask();
             try {
                 new System.Threading.Thread(() => {
                     try {
